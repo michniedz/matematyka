@@ -21,6 +21,7 @@
     "bootstrap": "^5.3.2",
     "expo": "~49.0.15",
     "expo-status-bar": "~1.6.0",
+    "galio-framework": "^0.8.0",
     "react": "18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-dom": "18.2.0",
