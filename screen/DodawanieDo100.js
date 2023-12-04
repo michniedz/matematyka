@@ -1,27 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, Text, TextInput, View, StyleSheet} from "react-native";
 import { theme, Toast, Button, Input } from 'galio-framework';
 
+const generateRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const DodawanieDo100 = () => {
-    const generateRandomNumber = () => Math.floor(Math.random() * 99 + 1);
-    const [number1, setNumber1] = useState(generateRandomNumber);
-    const generateRandomNumber2 = () => Math.floor(Math.random() * (100-number1) + 1);
+    const maxNumber = 100;
+    const [number1, setNumber1] = useState(generateRandomNumber(1, maxNumber));
+    const [number2, setNumber2] = useState(generateRandomNumber(1, maxNumber-number1));
 
-    const [number2, setNumber2] = useState(generateRandomNumber2);
-    console.log(number1 + " " + number2)
     const [userInput, setUserInput] = useState('');
     const [score, setScore] = useState(0);
     const [blad, setBlad] = useState(0);
 
-    useEffect(() => {
-        setNumber1(generateRandomNumber);
-        setNumber2(generateRandomNumber2);
-        setUserInput('');
-    }, [score, blad]);
-
-    //const [isShow, setShow] = useState(false);
+    const calc = () => {
+        setUserInput('')
+        const newNumber = generateRandomNumber(1, maxNumber)
+        setNumber1(newNumber)
+        setNumber2(generateRandomNumber(1, maxNumber - newNumber))
+        console.log(number1, number2)
+    }
 
     const sprSum = () => {
+        calc()
         const sum = number1 + number2;
         //setShow(!isShow);
         if (parseInt(userInput) === sum) {
