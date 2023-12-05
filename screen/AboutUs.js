@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {View, StyleSheet, Text, Linking, TextInput, Button, Alert} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import MailCore from 'react-native-mailcore';
 import SendIntentAndroid from 'react-native-send-intent';
 
 
@@ -9,51 +8,9 @@ const AboutUs = () => {
     const [temat, setTemat] = useState('');
     const [wiadomosc, setWiadomosc] = useState('');
     const odbiorca = 'michniedz@gmail.com';
-    const handleSend = () => {
-        const emailUri = `mailto:${odbiorca}?subject=${temat}&body=${wiadomosc}`;
-
-        SendIntentAndroid.openChooserWithOptions(
-            { temat, text: wiadomosc, title: 'Send Email' },
-            'Send Email',
-            emailUri
-        )
-            .then((isSent) => {
-                if (isSent) {
-                    Alert.alert('Email sent successfully');
-                } else {
-                    Alert.alert('Email not sent');
-                }
-            })
-            .catch((error) => {
-                console.error('Error sending email:', error);
-                Alert.alert('Error sending email');
-            });
-    };
 
 
-    // const handleSend = () => {
-    //
-    //     // Przykładowa funkcja fetch
-    //     fetch('https://example.com/api/send-message', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             subject: temat,
-    //             message: wiadomosc,
-    //         }),
-    //     })
-    //         .then((response) => response.json())
-    //         .then((data) => {
-    //             console.log('Success:', data);
-    //             Alert.alert('Wiadomość wysłana!');
-    //         })
-    //         .catch((error) => {
-    //             console.error('Error:', error);
-    //             Alert.alert('Błąd wysyłania wiadomości. Spróbuj ponownie.');
-    //         });
-    // };
+
     return (
         <View style={styles.inputView}>
             <View style={styles.ikony}>
