@@ -50,7 +50,7 @@ const DodawanieDo100 = () => {
                 {/*/>*/}
                 <Input color={theme.COLORS.SUCCESS}
                        fontSize={30}
-                       style={{ borderColor: theme.COLORS.SUCCESS }}
+                       style={{ borderColor: theme.COLORS.SUCCESS, width: 100 }}
                        placeholderTextColor={theme.COLORS.SUCCESS}
                        onChangeText={(text) => setUserInput(text)}
                        value={userInput} />
@@ -66,8 +66,12 @@ const DodawanieDo100 = () => {
                         onPress={resetScore}>Czyść odpowiedzi</Button>
             </View>
             <View style={styles.odpowiedzi}>
-                <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score}</Text>
-                <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text>
+                {
+                    blad > 0 ? <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text> : null
+                }
+                {
+                    score > 0 ? <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score}</Text> : null
+                }
             </View>
         </View>
     );

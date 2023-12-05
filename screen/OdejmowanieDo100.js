@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Button, StyleSheet, Text, TextInput, View} from "react-native";
+import {Alert, StyleSheet, Text, TextInput, View} from "react-native";
+import { theme, Toast, Button, Input } from 'galio-framework';
 
 const generateRandomNumber = () => Math.floor(Math.random() * 100) + 1;
 const OdejmowanieDo100 = () => {
@@ -38,20 +39,30 @@ const OdejmowanieDo100 = () => {
         <View style={styles.container}>
             <View style={styles.dzialanie}>
                 <Text style={{fontSize: 40}}>{String(number1>=number2?number1:number2)}  -  {String(number1<number2?number1:number2)} = </Text>
-                <TextInput
-                    style={{ fontSize:40, height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 10, marginBottom: 10, textAlign: 'center' }}
-                    keyboardType="numeric"
-                    onChangeText={(text) => setUserInput(text)}
-                    value={userInput}
-                />
+                <Input color={theme.COLORS.SUCCESS}
+                       fontSize={30}
+                       style={{ borderColor: theme.COLORS.SUCCESS, width: 100 }}
+                       placeholderTextColor={theme.COLORS.SUCCESS}
+                       onChangeText={(text) => setUserInput(text)}
+                       value={userInput} />
             </View>
             <View style={styles.przyciski}>
-                <Button style={{fontSize: 40}} title="Sprawdź wynik" onPress={sprSum} />
-                <Button style={{fontSize: 40}} title="Resetuj odpowiedzi" onPress={resetScore} />
+                <Button color="success"
+                        round size="medium"
+                        icon="check" iconFamily="check" iconSize={20} iconColor="#fff"
+                        onPress={sprSum}>Sprawdź wynik</Button>
+                <Button color="#F00"
+                        round size="medium"
+                        icon="clear" iconFamily="clear" iconSize={20} iconColor="#fff"
+                        onPress={resetScore}>Czyść odpowiedzi</Button>
             </View>
             <View style={styles.odpowiedzi}>
-                <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score}</Text>
-                <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text>
+                {
+                    blad > 0 ? <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text> : null
+                }
+                {
+                    score > 0 ? <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score}</Text> : null
+                }
             </View>
         </View>
     );

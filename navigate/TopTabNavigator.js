@@ -17,7 +17,7 @@ function TopTabNavigator() {
         <Tab.Navigator>
             <Tab.Screen name="Dodawanie" component={DodawanieDo100}
                         options={{
-                            tabBarLabel: 'dodawanie',
+                            tabBarLabel: '+',
                             tabBarIcon: () => (
                                 <Icon3 name="add" color="black" size={32} />
                             ),
@@ -25,7 +25,7 @@ function TopTabNavigator() {
             />
             <Tab.Screen name="Odejmowanie" component={OdejmowanieDo100}
                         options={{
-                            tabBarLabel: 'odejmowanie',
+                            tabBarLabel: '-',
                             tabBarIcon: () => (
                                 <Icon name="minus" color="black" size={24} />
                             ),
@@ -33,7 +33,7 @@ function TopTabNavigator() {
             />
             <Tab.Screen name="Mnożenie" component={MnozenieDo100}
                         options={{
-                            tabBarLabel: 'mnożenie',
+                            tabBarLabel: '*',
                             tabBarIcon: () => (
                                 <Icon2 name="multiplication" color="black" size={24} />
                             ),
@@ -41,7 +41,7 @@ function TopTabNavigator() {
             />
             <Tab.Screen name="Dzielenie" component={DzielenieDo100}
                         options={{
-                            tabBarLabel: 'dzielenie',
+                            tabBarLabel: '/',
                             tabBarIcon: () => (
                                 <Icon name="divide" color="black" size={24} />
                             ),
