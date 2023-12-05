@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {View, StyleSheet, Text, Linking, TextInput, Button, Alert} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import SendIntentAndroid from 'react-native-send-intent';
 
 
 const AboutUs = () => {
@@ -50,7 +49,7 @@ const AboutUs = () => {
                     multiline={true}
                     onChangeText={(text) => setWiadomosc(text)}
                 />
-                <Button title={"Wyślij"} textStyle={{color: 'white'}} onPress={handleSend} />
+                <Button title={"Wyślij"} textStyle={{color: 'white'}}  />
             </View>
         </View>
     );
