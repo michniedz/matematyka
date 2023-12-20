@@ -4,7 +4,7 @@
     "slug": "matematyka",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logoMa.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -26,7 +26,7 @@
       "package": "com.michniedz.matematyka"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/faviconik.png"
     },
     "extra": {
       "eas": {

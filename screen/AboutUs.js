@@ -8,8 +8,6 @@ const AboutUs = () => {
     const [wiadomosc, setWiadomosc] = useState('');
     const odbiorca = 'michniedz@gmail.com';
 
-
-
     return (
         <View style={styles.inputView}>
             <View style={styles.ikony}>

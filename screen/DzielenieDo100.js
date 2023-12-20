@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View} from "react-native";
+import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 import { theme, Toast, Button, Input } from 'galio-framework';
+import {Odpowiedzi, Przyciski, Dzialanie} from "../components/StyleComponentow";
+import {LinearGradient} from "expo-linear-gradient";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const generateRandomNumber = () => Math.floor(Math.random() * 10) + 1;
 const DzielenieDo100 = () => {
@@ -40,9 +43,9 @@ const DzielenieDo100 = () => {
         setBlad(0);
     }
     return (
-        <View style={styles.container}>
-            <View style={styles.dzialanie}>
-                <Text style={{fontSize: 40}}>{String(number1>=number2?number1:number2)}  :  {String(number1<number2?number1:number2)} = </Text>
+        <LinearGradient colors={['#ADA996', '#F2F2F2', '#DBDBDB', '#EAEAEA']} style={styles.container}>
+            <Dzialanie>
+                <Text style={{fontSize: 40, fontWeight: 'bold'}}>{String(number1>=number2?number1:number2)}  :  {String(number1<number2?number1:number2)} = </Text>
                 <Input color={theme.COLORS.SUCCESS}
                     fontSize={30}
                     style={{ borderColor: theme.COLORS.SUCCESS, width: 70  }}
@@ -50,7 +53,7 @@ const DzielenieDo100 = () => {
                     onChangeText={(text) => setUserInput(text)}
                     value={userInput}
                 />
-                <Text style={{fontSize: 30}}>reszty</Text>
+                <Text style={{fontSize: 30, fontWeight: 'bold'}}>reszty</Text>
                 <Input color={theme.COLORS.SUCCESS}
                     fontSize={30}
                     style={{ borderColor: theme.COLORS.SUCCESS, width: 70 }}
@@ -58,29 +61,63 @@ const DzielenieDo100 = () => {
                     onChangeText={(text) => setUserInput2(text)}
                     value={userInput2}
                 />
-            </View>
-            <View style={styles.przyciski}>
-                <Button color="success"
-                        round size="medium"
-                        icon="check" iconFamily="check" iconSize={20} iconColor="#fff"
-                        onPress={sprSum}>Sprawdź wynik</Button>
-                <Button color="#F00"
-                        round size="medium"
-                        icon="clear" iconFamily="clear" iconSize={20} iconColor="#fff"
-                        onPress={resetScore}>Czyść odpowiedzi</Button>
-            </View>
-            <View style={styles.odpowiedzi}>
-
+            </Dzialanie>
+            <Przyciski>
+                <TouchableOpacity onPress={sprSum} style={{marginVertical: 10}}>
+                    <LinearGradient
+                        colors={['green', 'rgb(0,255,0)', 'green' ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0.9, y: 0.9 }}
+                        style={{
+                            padding: 15,
+                            alignItems: 'center',
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text
+                            style={{ color: 'white', fontWeight: 'bold', fontSize: 20}}>
+                            <Icon color='white' name='check' style={{fontSize: 20}} />
+                            Sprawdź wynik
+                        </Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={resetScore} style={{marginVertical: 10}}>
+                    <LinearGradient
+                        colors={['rgb(155,0,0)', 'red', 'rgb(155,0,0)' ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                            padding: 15,
+                            alignItems: 'center',
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text
+                            style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>
+                            <Icon color='white' name='remove' style={{fontSize: 20}} />
+                            Czyść odpowiedzi
+                        </Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </Przyciski>
+            <Odpowiedzi>
                 {
-                    blad > 0 ? <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text> : null
+                    //score > 0 ? <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score} </Text> : null
+                    score > 0 ? <View>
+                        <Text style={{fontSize: 40, color: 'green', fontWeight: 'bold'}}>
+                            <Icon color='green' name='check' style={{fontSize: 40}} />{score} </Text>
+                    </View> : null
                 }
                 {
-                    score > 0 ? <Text style={{fontSize: 20, color: 'green'}}>Poprawne odpowiedzi: {score}</Text> : null
+                    //blad > 0 ? <Text style={{fontSize: 20, color: 'red'}}>Błędne odpowiedzi: {blad}</Text> : null
+                    blad > 0 ? <View>
+                        <Text style={{fontSize: 40, color: 'red', fontWeight: 'bold'}}>
+                            <Icon color='red' name='remove' style={{fontSize: 40}} />{blad} </Text>
+                    </View> : null
                 }
+            </Odpowiedzi>
 
-            </View>
-
-        </View>
+        </LinearGradient>
     );
 };
 
@@ -89,19 +126,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
+        flexDirection: 'column',
     },
     dzialanie: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
     },
-    przyciski: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 5,
-        marginHorizontal: 10,
-    },
-    odpowiedzi: {
-        flexDirection: 'column',
-    }
 });
