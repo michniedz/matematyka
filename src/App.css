@@ -1,0 +1,262 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+/* ---------------------------------------------------------------- */
+/* Górna belka                                                       */
+/* ---------------------------------------------------------------- */
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 12px;
+  padding-inline: max(20px, calc((100vw - 1160px) / 2));
+  background: var(--appbar);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 4px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-strong);
+}
+
+.brand__mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(140deg, var(--brand-solid), var(--brand-solid-2));
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 10px 20px -12px var(--brand);
+}
+
+.brand__line {
+  width: 13px;
+  height: 2px;
+  margin: 2.5px 0;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.06;
+}
+
+.brand__text strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.brand__text small {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.appbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  color: var(--amber);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 1.15rem;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.icon-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  background: var(--surface-soft);
+}
+
+/* ---------------------------------------------------------------- */
+/* Układ strony                                                      */
+/* ---------------------------------------------------------------- */
+
+.app__main {
+  flex: 1;
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 26px clamp(18px, 4vw, 32px) 64px;
+}
+
+.app__footer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px 16px 30px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+
+/* ---------------------------------------------------------------- */
+/* Wspólne elementy                                                  */
+/* ---------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--brand-solid), var(--brand-solid-2));
+  color: #fff;
+  box-shadow: 0 14px 26px -15px var(--brand-solid);
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px -14px var(--brand-solid);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+}
+
+.btn--ghost {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-strong);
+}
+
+.btn--ghost:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-soft);
+}
+
+.btn--lg {
+  padding: 15px 26px;
+  font-size: 1.04rem;
+}
+
+.btn--sm {
+  padding: 8px 14px;
+  font-size: 0.86rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.chip--violet {
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.chip--rose {
+  background: var(--rose-soft);
+  color: var(--rose);
+}
+
+.chip--mint {
+  background: var(--mint-soft);
+  color: var(--mint);
+}
+
+.chip--amber {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+@media (max-width: 640px) {
+  .app__main {
+    padding-top: 18px;
+    padding-bottom: 44px;
+  }
+
+  .appbar {
+    padding-block: 10px;
+  }
+
+  .brand__text small {
+    display: none;
+  }
+}

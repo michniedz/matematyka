@@ -1,0 +1,599 @@
+/* ---------------------------------------------------------------- */
+/* Figury geometryczne — rysunki, karty i zadania                    */
+/* ---------------------------------------------------------------- */
+
+.figure-svg,
+.angle-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure-svg__shape {
+  fill: var(--surface-soft);
+  stroke: var(--brand);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.figure-card--violet .figure-svg__shape {
+  fill: var(--violet-soft);
+  stroke: var(--violet);
+}
+
+.figure-card--mint .figure-svg__shape {
+  fill: var(--mint-soft);
+  stroke: var(--mint);
+}
+
+.figure-card--rose .figure-svg__shape {
+  fill: var(--rose-soft);
+  stroke: var(--rose);
+}
+
+.figure-svg__dash {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  opacity: 0.7;
+}
+
+.figure-svg__right-angle {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2.5;
+}
+
+.figure-svg__radius {
+  stroke: var(--brand);
+  stroke-width: 2.5;
+}
+
+.figure-svg__center {
+  fill: var(--brand);
+}
+
+.figure-svg__label {
+  fill: var(--text-muted);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.angle-svg__ray {
+  stroke: var(--brand);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.angle-svg__arc {
+  fill: var(--brand-soft);
+  stroke: var(--brand);
+  stroke-width: 2.5;
+}
+
+.angle-svg__right-angle {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 3;
+}
+
+.angle-svg__full {
+  fill: var(--brand-soft);
+  stroke: var(--brand);
+  stroke-width: 3;
+}
+
+.angle-svg__arrow {
+  fill: var(--brand);
+}
+
+.angle-svg__vertex {
+  fill: var(--brand);
+}
+
+/* Strona startowa */
+
+.geometry-hero {
+  position: relative;
+  min-height: 390px;
+}
+
+.geometry-hero__card {
+  position: absolute;
+  width: min(78%, 300px);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.geometry-hero__card--figure {
+  top: 2%;
+  left: 0;
+  rotate: -3deg;
+}
+
+.geometry-hero__card--angle {
+  right: 0;
+  bottom: 2%;
+  rotate: 2deg;
+}
+
+.geometry-hero__figure {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.geometry-hero__figure .figure-svg {
+  width: min(100%, 150px);
+}
+
+.geometry-hero__formulas {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  color: var(--brand);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.geometry-hero__card--angle .angle-svg {
+  width: min(100%, 180px);
+  margin: 8px auto 0;
+}
+
+/* Wzory i wyjaśnienia */
+
+.geometry-reference,
+.angles-reference {
+  margin-top: 36px;
+}
+
+.figure-group {
+  margin-top: 24px;
+}
+
+.figure-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.figure-group__head h3 {
+  margin: 0;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.figure-group__head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.figure-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.figure-card {
+  --figure-color: var(--violet);
+  --figure-soft: var(--violet-soft);
+
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.figure-card--mint {
+  --figure-color: var(--mint);
+  --figure-soft: var(--mint-soft);
+}
+
+.figure-card--rose {
+  --figure-color: var(--rose);
+  --figure-soft: var(--rose-soft);
+}
+
+.figure-card__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: var(--figure-soft);
+}
+
+.figure-card__visual .figure-svg {
+  max-width: 130px;
+}
+
+.figure-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.figure-card__body h4 {
+  margin: 0;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.figure-card__summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.figure-card__formulas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 2px 0 0;
+}
+
+.figure-card__formulas div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.figure-card__formulas dt {
+  flex: none;
+  width: 48px;
+  color: var(--figure-color);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.figure-card__formulas dd {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.figure-card__note {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+/* Kąty */
+
+.angle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.angle-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.angle-card__visual {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: var(--amber-soft);
+}
+
+.angle-card__visual .angle-svg {
+  max-width: 160px;
+}
+
+.angle-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.angle-card__range {
+  align-self: flex-start;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  color: var(--amber);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.angle-card__body h3 {
+  margin: 1px 0 0;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.angle-card__body p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.angle-card__example {
+  color: var(--amber);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+/* Karta zadania */
+
+.geometry-task__figure {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.geometry-task__figure .figure-svg {
+  width: min(100%, 280px);
+}
+
+.geometry-task__figure--angle .angle-svg {
+  width: min(100%, 220px);
+}
+
+.geometry-task__prompt {
+  position: relative;
+  z-index: 1;
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.figure-dims {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figure-dim {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Kroki */
+
+.geometry-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.geometry-step__figure {
+  width: min(100%, 250px);
+}
+
+.geometry-step__question {
+  color: var(--text-strong);
+  font-weight: 800;
+  text-align: center;
+}
+
+.geometry-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.geometry-calc__formula {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.geometry-calc__label {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.geometry-calc__formula-text {
+  color: var(--brand);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.geometry-calc__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.geometry-calc__expr {
+  color: var(--text-strong);
+  font-size: 1.45rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.geometry-calc__unit {
+  align-self: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.geometry-angle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.geometry-angle__figure {
+  width: min(100%, 220px);
+}
+
+/* Podsumowanie */
+
+.geometry-success__figure {
+  display: flex;
+  justify-content: center;
+  margin: 14px auto 0;
+}
+
+.geometry-success__figure .figure-svg {
+  width: min(100%, 230px);
+}
+
+.geometry-success__figure--angle .angle-svg {
+  width: min(100%, 200px);
+}
+
+.geometry-success__equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  background: var(--green-soft);
+}
+
+.geometry-success__answer-label {
+  color: var(--green);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.geometry-success__answer {
+  color: var(--green);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- */
+/* Responsywność                                                     */
+/* ---------------------------------------------------------------- */
+
+@media (max-width: 1020px) {
+  .figure-card {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  .angle-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 880px) {
+  .geometry-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .geometry-hero__card {
+    position: static;
+    width: 100%;
+    rotate: 0deg;
+  }
+
+  .figure-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .figure-card {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .figure-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .figure-card__visual {
+    width: min(100%, 210px);
+    margin: 0 auto;
+  }
+
+  .figure-group__head {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .angle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .geometry-hero__card {
+    padding: 16px;
+  }
+
+  .geometry-calc__expr {
+    font-size: 1.25rem;
+  }
+
+  .geometry-task__figure .figure-svg {
+    width: min(100%, 240px);
+  }
+}
