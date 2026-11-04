@@ -111,7 +111,18 @@ function makeFormulaOptions(correct, distractors) {
   }
 }
 
-function calc(expression, value, title, prompt, hint) {
+function phaseFromExpression(expression) {
+  return /[+-]/.test(expression) ? 'addsub' : 'muldiv'
+}
+
+function calc(
+  expression,
+  value,
+  title,
+  prompt,
+  hint,
+  phase = phaseFromExpression(expression),
+) {
   const rounded = Math.round(value * 100) / 100
 
   return {
@@ -123,6 +134,7 @@ function calc(expression, value, title, prompt, hint) {
     title,
     prompt,
     hint,
+    phase,
   }
 }
 
@@ -330,6 +342,7 @@ function buildArea(figure) {
             'Suma podstaw',
             `Ile wynosi ${a} + ${b}?`,
             'Dodaj długości obu podstaw.',
+            'parentheses',
           ),
           calc(
             `${sum} · ${h}`,
@@ -413,6 +426,7 @@ function buildPerimeter(figure) {
             'Długość i szerokość',
             `Ile wynosi ${a} + ${b}?`,
             'Dodaj długość i szerokość.',
+            'parentheses',
           ),
           calc(
             `2 · ${sum}`,
@@ -533,6 +547,7 @@ function buildPerimeter(figure) {
             'Dwa sąsiednie boki',
             `Ile wynosi ${a} + ${b}?`,
             'Dodaj dwa sąsiednie boki.',
+            'parentheses',
           ),
           calc(
             `2 · ${sum}`,

@@ -25,6 +25,8 @@ export function NumberInput({
   label = 'Odpowiedź',
   autoFocus = true,
   decimal = false,
+  className = '',
+  placeholder = '?',
 }) {
   const inputRef = useRef(null)
 
@@ -35,7 +37,9 @@ export function NumberInput({
   return (
     <input
       ref={inputRef}
-      className={`number-input${decimal ? ' number-input--decimal' : ''}`}
+      className={`number-input${decimal ? ' number-input--decimal' : ''}${
+        className ? ` ${className}` : ''
+      }`}
       type="text"
       inputMode={decimal ? 'decimal' : 'numeric'}
       pattern={decimal ? '[0-9.,]*' : '[0-9]*'}
@@ -45,7 +49,7 @@ export function NumberInput({
       onChange={(event) => onChange(cleanNumber(event.target.value, decimal))}
       disabled={disabled}
       aria-label={label}
-      placeholder="?"
+      placeholder={placeholder}
     />
   )
 }

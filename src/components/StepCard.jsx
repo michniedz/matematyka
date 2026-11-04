@@ -5,7 +5,7 @@ import { FractionPartInput } from './FractionPartInput.jsx'
 import { NumberInput } from './NumberInput.jsx'
 
 function emptyValue(step) {
-  if (step.kind === 'parts') {
+  if (step.kind === 'parts' || step.kind === 'fields') {
     return Object.fromEntries(step.fields.map((field) => [field.id, '']))
   }
 
@@ -48,7 +48,9 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
   const solvedRef = useRef(false)
 
   const inputNode = (() => {
-    if (step.kind === 'choice' || step.kind === 'parts') return null
+    if (step.kind === 'choice' || step.kind === 'parts' || step.kind === 'fields') {
+      return null
+    }
 
     if (step.kind === 'fraction') {
       return (
@@ -98,6 +100,31 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
             />,
           ]),
         )
+      : null
+
+  const fieldNode =
+    step.kind === 'fields'
+      ? (fieldId, { autoFocus = false } = {}) => {
+          const field = step.fields.find((item) => item.id === fieldId)
+
+          return (
+            <NumberInput
+              value={value[fieldId] ?? ''}
+              onChange={(next) =>
+                setValue((current) => ({
+                  ...current,
+                  [fieldId]: next,
+                }))
+              }
+              disabled={solved}
+              autoFocus={autoFocus}
+              decimal={field.decimal}
+              label={field.label}
+              placeholder={field.placeholder}
+              className="geometry-formula-field"
+            />
+          )
+        }
       : null
 
   const choiceNode =
@@ -192,6 +219,29 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
       return
     }
 
+    if (step.kind === 'fields') {
+      const values = {}
+
+      for (const field of step.fields) {
+        const parsed = field.decimal
+          ? parseDecimal(value[field.id])
+          : parseInteger(value[field.id])
+
+        if (parsed === null) {
+          setFeedback({
+            tone: 'error',
+            text: step.emptyMessage ?? 'Uzupełnij wszystkie pola.',
+          })
+          return
+        }
+
+        values[field.id] = parsed
+      }
+
+      handleResult(step.check(values))
+      return
+    }
+
     if (step.kind === 'fraction') {
       const numerator = parseInteger(value.n)
       const hasDenominator = String(value.d ?? '').trim() !== ''
@@ -265,6 +315,15 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
           step.fields.map((field) => [field.id, String(field.answer)]),
         ),
       )
+    } else if (step.kind === 'fields') {
+      setValue(
+        Object.fromEntries(
+          step.fields.map((field) => [
+            field.id,
+            field.answerText ?? String(field.answer),
+          ]),
+        ),
+      )
     } else if (step.kind === 'fraction') {
       setValue({
         n: String(step.answer.n),
@@ -308,7 +367,9 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
               : choiceNode
             : step.kind === 'parts'
               ? step.visual(inputNodes)
-              : step.visual(inputNode)}
+              : step.kind === 'fields'
+                ? step.visual(fieldNode)
+                : step.visual(inputNode)}
         </div>
 
         <div className="step-card__actions">

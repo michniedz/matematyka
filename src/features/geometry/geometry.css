@@ -453,6 +453,58 @@
   font-weight: 800;
 }
 
+.geometry-substitution {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.geometry-substitution__formula {
+  display: block;
+  max-width: 100%;
+  line-height: 2.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.geometry-substitution__slot {
+  display: inline-block;
+  margin: 0 0.12em;
+  vertical-align: middle;
+}
+
+.geometry-formula-field {
+  width: 3em;
+  height: 1.7em;
+  padding: 0 0.25em;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.geometry-substitution__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.geometry-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.geometry-phase .geometry-calc__formula {
+  width: 100%;
+}
+
 .geometry-calc__row {
   display: flex;
   flex-wrap: wrap;

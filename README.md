@@ -163,12 +163,16 @@ Dane figur i kątów są oddzielone od logiki zadań:
 - `generator.js` losuje wymiary i tworzy listę obliczeń prowadzących do wyniku,
 - `Figure.jsx` i `AngleFigure.jsx` rysują figury w SVG na podstawie danych.
 
-Zadanie geometryczne składa się z dwóch albo trzech kroków:
+Zadanie geometryczne składa się z trzech do siedmiu kroków:
 
 1. **Wybór wzoru** — uczeń wybiera właściwy wzór spośród trzech propozycji.
-2. **Obliczenia** — kolejne działania prowadzą do pola lub obwodu; np. przy
+2. **Podstawienie danych** — uczeń wpisuje wymiary w miejsce liter we wzorze.
+3. **Kolejność działań** — gdy do wykonania jest więcej niż jedno działanie,
+   uczeń wybiera, co ma pierwszeństwo: nawias, mnożenie i dzielenie czy
+   dodawanie i odejmowanie.
+4. **Obliczenia** — kolejne działania prowadzą do pola lub obwodu; np. przy
    trójkącie najpierw mnożymy podstawę przez wysokość, a potem dzielimy przez 2.
-3. **Wynik** — odpowiedź jest sprawdzana razem z jednostką (`cm` lub `cm²`).
+5. **Wynik** — odpowiedź jest sprawdzana razem z jednostką (`cm` lub `cm²`).
 
 Zadania z kątami pokazują rysunek kąta i pytają najpierw o jego rodzaj, a potem
 o pasujący opis miary. W trybie mieszanym losowo pojawiają się pola, obwody
