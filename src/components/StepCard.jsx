@@ -1,10 +1,15 @@
 import { useRef, useState } from 'react'
 import { simplify } from '../lib/math.js'
 import { FractionInput } from './FractionInput.jsx'
+import { FractionPartInput } from './FractionPartInput.jsx'
 import { NumberInput } from './NumberInput.jsx'
 
-function emptyValue(kind) {
-  return kind === 'fraction' ? { n: '', d: '' } : ''
+function emptyValue(step) {
+  if (step.kind === 'parts') {
+    return Object.fromEntries(step.fields.map((field) => [field.id, '']))
+  }
+
+  return step.kind === 'fraction' ? { n: '', d: '' } : ''
 }
 
 function parseInteger(raw) {
@@ -33,7 +38,7 @@ const FEEDBACK_ICON = {
 }
 
 export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
-  const [value, setValue] = useState(() => emptyValue(step.kind))
+  const [value, setValue] = useState(() => emptyValue(step))
   const [choice, setChoice] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [solved, setSolved] = useState(false)
@@ -42,21 +47,27 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
   const [wrongCount, setWrongCount] = useState(0)
   const solvedRef = useRef(false)
 
-  const inputNode =
-    step.kind === 'choice' ? null : step.kind === 'fraction' ? (
-      <FractionInput
-        value={value}
-        onChange={setValue}
-        disabled={solved}
-        denominatorPlaceholder={
-          step.denominatorOptional
-            ? step.answer.d === 1
-              ? '1'
+  const inputNode = (() => {
+    if (step.kind === 'choice' || step.kind === 'parts') return null
+
+    if (step.kind === 'fraction') {
+      return (
+        <FractionInput
+          value={value}
+          onChange={setValue}
+          disabled={solved}
+          denominatorPlaceholder={
+            step.denominatorOptional
+              ? step.answer.d === 1
+                ? '1'
+                : '?'
               : '?'
-            : '?'
-        }
-      />
-    ) : (
+          }
+        />
+      )
+    }
+
+    return (
       <NumberInput
         value={value}
         onChange={setValue}
@@ -64,6 +75,30 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
         decimal={step.kind === 'decimal'}
       />
     )
+  })()
+
+  const inputNodes =
+    step.kind === 'parts'
+      ? Object.fromEntries(
+          step.fields.map((field, fieldIndex) => [
+            field.id,
+            <FractionPartInput
+              key={field.id}
+              value={value[field.id] ?? ''}
+              onChange={(next) =>
+                setValue((current) => ({
+                  ...current,
+                  [field.id]: next,
+                }))
+              }
+              disabled={solved}
+              autoFocus={fieldIndex === 0}
+              label={field.label}
+              part={field.part}
+            />,
+          ]),
+        )
+      : null
 
   const choiceNode =
     step.kind === 'choice' ? (
@@ -136,6 +171,27 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
       return
     }
 
+    if (step.kind === 'parts') {
+      const values = {}
+
+      for (const field of step.fields) {
+        const parsed = parseInteger(value[field.id])
+
+        if (parsed === null) {
+          setFeedback({
+            tone: 'error',
+            text: step.emptyMessage ?? 'Uzupełnij wszystkie zaznaczone liczby.',
+          })
+          return
+        }
+
+        values[field.id] = parsed
+      }
+
+      handleResult(step.check(values))
+      return
+    }
+
     if (step.kind === 'fraction') {
       const numerator = parseInteger(value.n)
       const hasDenominator = String(value.d ?? '').trim() !== ''
@@ -203,6 +259,12 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
 
     if (step.kind === 'choice') {
       setChoice(step.answer)
+    } else if (step.kind === 'parts') {
+      setValue(
+        Object.fromEntries(
+          step.fields.map((field) => [field.id, String(field.answer)]),
+        ),
+      )
     } else if (step.kind === 'fraction') {
       setValue({
         n: String(step.answer.n),
@@ -244,7 +306,9 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
             ? step.visual
               ? step.visual(choiceNode)
               : choiceNode
-            : step.visual(inputNode)}
+            : step.kind === 'parts'
+              ? step.visual(inputNodes)
+              : step.visual(inputNode)}
         </div>
 
         <div className="step-card__actions">

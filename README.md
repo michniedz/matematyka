@@ -25,7 +25,6 @@ widać na osi czasu, a ukończone zadania liczy licznik w nagłówku.
 Wymagany Node.js w wersji zgodnej z Vite 8 (Node 20.19+ lub 22.12+).
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
@@ -40,6 +39,21 @@ npm run build    # produkcyjna kompilacja do katalogu dist/
 npm run preview  # podgląd zbudowanej wersji
 npm run lint     # sprawdzenie kodu przez oxlint
 ```
+
+## Publikacja na GitHub Pages
+
+Projekt jest przygotowany do automatycznej publikacji na GitHub Pages.
+Workflow `.github/workflows/deploy.yml` buduje aplikację po każdym pushu do
+gałęzi `main` i publikuje katalog `dist`.
+
+1. W repozytorium na GitHubie wejdź w **Settings → Pages**.
+2. W sekcji **Build and deployment** ustaw **Source** na **GitHub Actions**.
+3. Wypchnij zmiany do gałęzi `main`.
+4. Po zakończeniu workflow aplikacja będzie dostępna pod adresem
+   `https://michniedz.github.io/matematyka/`.
+
+Konfiguracja Vite automatycznie ustawia bazę na nazwę repozytorium, więc
+publikacja będzie działać także po zmianie nazwy repozytorium.
 
 ## Struktura projektu
 
@@ -102,6 +116,11 @@ src/
    mnożeniu i dzieleniu — żeby dało się skrócić na krzyż.
 2. `buildSteps(task)` tworzy listę kroków. Każdy krok ma polecenie, oczekiwaną
    odpowiedź, funkcję sprawdzającą, podpowiedź oraz opcjonalną wizualizację.
+   Wszystkie kroki pokazują całe działanie. Przy dodawaniu i odejmowaniu po
+   wspólnym mianowniku uczeń uzupełnia liczniki obu ułamków w jednym kroku,
+   a dopiero potem wpisuje wynik. Przy mnożeniu i dzieleniu po skracaniu na
+   krzyż uzupełnia liczby powstałe ze skrócenia, a wynik wpisuje w kolejnym
+   kroku.
 3. `StepCard` przyjmuje odpowiedź, wyświetla komunikat i po poprawnym wyniku
    pozwala przejść dalej. Wpisy trafiają do osi czasu w panelu bocznym.
 4. Po ostatnim kroku pojawia się karta podsumowania z wynikiem i przyciskiem

@@ -33,6 +33,33 @@ function fractionStep({ id, title, prompt, hint, answer, visual, solvedVisual, c
   }
 }
 
+function partsStep({
+  id,
+  title,
+  prompt,
+  hint,
+  fields,
+  emptyMessage,
+  visual,
+  solvedVisual,
+  check,
+  revealMessage,
+}) {
+  return {
+    id,
+    kind: 'parts',
+    title,
+    prompt,
+    hint,
+    fields,
+    emptyMessage,
+    visual,
+    solvedVisual,
+    check,
+    revealMessage,
+  }
+}
+
 function ok(message) {
   return { ok: true, message }
 }
@@ -102,14 +129,20 @@ function checkSimplification(raw, answer) {
   }
 }
 
-function solvedEquation(left, sign, right, equals, result) {
+/**
+ * Ułamek, w którym wybrane części można zastąpić polami do wpisania.
+ * Wartości bez pola są wyświetlane jako stały tekst.
+ */
+function fractionSlot({ n, d, numeratorInput, denominatorInput }) {
+  if (!numeratorInput && !denominatorInput) {
+    return <Fraction n={n} d={d} />
+  }
+
   return (
-    <span className="solved-line">
-      <Fraction n={left.n} d={left.d} size="sm" />
-      <span className="solved-sign">{sign}</span>
-      <Fraction n={right.n} d={right.d} size="sm" />
-      <span className="solved-sign">{equals}</span>
-      <Fraction n={result.n} d={result.d} size="sm" />
+    <span className="fraction fraction--md fraction--input">
+      {numeratorInput ?? <span className="fraction__num">{n}</span>}
+      <span className="fraction__line" aria-hidden="true" />
+      {denominatorInput ?? <span className="fraction__den">{d}</span>}
     </span>
   )
 }
@@ -175,102 +208,135 @@ function buildAddSubSteps(task) {
     }),
   )
 
-  if (lcd !== left.d) {
-    const factor = lcd / left.d
-    const target = left.n * factor
+  const needsLeftScale = lcd !== left.d
+  const needsRightScale = lcd !== right.d
+
+  if (needsLeftScale || needsRightScale) {
+    const leftFactor = lcd / left.d
+    const rightFactor = lcd / right.d
+    const fields = []
+
+    if (needsLeftScale) {
+      fields.push({
+        id: 'left',
+        answer: left.n * leftFactor,
+        original: left.n,
+        oldDenominator: left.d,
+        factor: leftFactor,
+        label: 'Licznik pierwszego ułamka',
+        part: 'num',
+      })
+    }
+
+    if (needsRightScale) {
+      fields.push({
+        id: 'right',
+        answer: right.n * rightFactor,
+        original: right.n,
+        oldDenominator: right.d,
+        factor: rightFactor,
+        label: 'Licznik drugiego ułamka',
+        part: 'num',
+      })
+    }
+
+    const hintParts = []
+
+    if (needsLeftScale) {
+      hintParts.push(
+        `Pierwszy ułamek: ${lcd} ÷ ${left.d} = ${leftFactor}, więc licznik mnożymy przez ${leftFactor}: ${left.n} · ${leftFactor} = ${left.n * leftFactor}.`,
+      )
+    }
+
+    if (needsRightScale) {
+      hintParts.push(
+        `Drugi ułamek: ${lcd} ÷ ${right.d} = ${rightFactor}, więc licznik mnożymy przez ${rightFactor}: ${right.n} · ${rightFactor} = ${right.n * rightFactor}.`,
+      )
+    }
 
     steps.push(
-      numberStep({
-        id: 'scale-left',
-        title: 'Rozszerz pierwszy ułamek',
-        prompt: `Uzupełnij licznik, aby mianownik pierwszego ułamka był równy ${lcd}.`,
-        hint: `${lcd} ÷ ${left.d} = ${factor}. Licznik mnożymy przez tę samą liczbę: ${left.n} · ${factor} = ${target}.`,
-        answer: target,
-        visual: (input) => (
+      partsStep({
+        id: 'scale',
+        title: fields.length > 1 ? 'Rozszerz ułamki' : 'Rozszerz ułamek',
+        prompt:
+          fields.length > 1
+            ? `Uzupełnij liczniki, aby oba ułamki miały mianownik ${lcd}.`
+            : needsLeftScale
+              ? `Uzupełnij licznik pierwszego ułamka, aby miał mianownik ${lcd}.`
+              : `Uzupełnij licznik drugiego ułamka, aby miał mianownik ${lcd}.`,
+        hint: hintParts.join(' '),
+        fields,
+        emptyMessage:
+          fields.length > 1
+            ? 'Wpisz liczby w oba liczniki.'
+            : 'Wpisz liczbę w licznik.',
+        visual: (inputs) => (
           <div className="step-formula">
             <Fraction n={left.n} d={left.d} />
+            <span className="op-sign">{sign}</span>
+            <Fraction n={right.n} d={right.d} />
             <span className="equals">=</span>
-            <span className="fraction fraction--md">
-              <span className="fraction__num fraction__slot">{input}</span>
-              <span className="fraction__line" aria-hidden="true" />
-              <span className="fraction__den">{lcd}</span>
-            </span>
+            {fractionSlot({
+              n: left.n,
+              d: lcd,
+              numeratorInput: inputs.left,
+            })}
+            <span className="op-sign">{sign}</span>
+            {fractionSlot({
+              n: right.n,
+              d: lcd,
+              numeratorInput: inputs.right,
+            })}
           </div>
         ),
         solvedVisual: (
           <span className="solved-line">
             <Fraction n={left.n} d={left.d} size="sm" />
-            <span className="solved-sign">=</span>
-            <Fraction n={target} d={lcd} size="sm" />
-          </span>
-        ),
-        check: (value) => {
-          if (value === target) {
-            return ok('Dobrze! Ułamek został rozszerzony.')
-          }
-
-          if (value === left.n) {
-            return wrong(
-              'Pamiętaj, że przy rozszerzaniu zmienia się też licznik.',
-              'warn',
-            )
-          }
-
-          return wrong(
-            `Nie do końca. Mianownik zwiększamy ${factor} razy, więc licznik też mnożymy przez ${factor}.`,
-          )
-        },
-        revealMessage: `${left.n}/${left.d} = ${target}/${lcd}.`,
-      }),
-    )
-  }
-
-  if (lcd !== right.d) {
-    const factor = lcd / right.d
-    const target = right.n * factor
-
-    steps.push(
-      numberStep({
-        id: 'scale-right',
-        title: 'Rozszerz drugi ułamek',
-        prompt: `Uzupełnij licznik, aby mianownik drugiego ułamka był równy ${lcd}.`,
-        hint: `${lcd} ÷ ${right.d} = ${factor}. Licznik mnożymy przez tę samą liczbę: ${right.n} · ${factor} = ${target}.`,
-        answer: target,
-        visual: (input) => (
-          <div className="step-formula">
-            <Fraction n={right.n} d={right.d} />
-            <span className="equals">=</span>
-            <span className="fraction fraction--md">
-              <span className="fraction__num fraction__slot">{input}</span>
-              <span className="fraction__line" aria-hidden="true" />
-              <span className="fraction__den">{lcd}</span>
-            </span>
-          </div>
-        ),
-        solvedVisual: (
-          <span className="solved-line">
+            <span className="solved-sign">{sign}</span>
             <Fraction n={right.n} d={right.d} size="sm" />
             <span className="solved-sign">=</span>
-            <Fraction n={target} d={lcd} size="sm" />
+            <Fraction n={scaledLeft} d={lcd} size="sm" />
+            <span className="solved-sign">{sign}</span>
+            <Fraction n={scaledRight} d={lcd} size="sm" />
           </span>
         ),
-        check: (value) => {
-          if (value === target) {
-            return ok('Dobrze! Oba ułamki mają teraz ten sam mianownik.')
+        check: (values) => {
+          const incorrect = fields.filter(
+            (field) => values[field.id] !== field.answer,
+          )
+
+          if (incorrect.length === 0) {
+            return ok(
+              fields.length > 1
+                ? 'Dobrze! Oba ułamki mają teraz wspólny mianownik.'
+                : 'Dobrze! Ułamek został rozszerzony.',
+            )
           }
 
-          if (value === right.n) {
+          const unchanged = incorrect.some(
+            (field) => values[field.id] === field.original,
+          )
+
+          if (unchanged) {
             return wrong(
-              'Pamiętaj, że przy rozszerzaniu zmienia się też licznik.',
+              'Pamiętaj, że przy rozszerzaniu zmienia się też licznik. Pomnóż licznik przez tę samą liczbę, co mianownik.',
               'warn',
             )
           }
 
+          const field = incorrect[0]
+          const which = field.id === 'left' ? 'pierwszy' : 'drugi'
+
           return wrong(
-            `Nie do końca. Mianownik zwiększamy ${factor} razy, więc licznik też mnożymy przez ${factor}.`,
+            `Sprawdź ${which} ułamek: ${lcd} ÷ ${field.oldDenominator} = ${field.factor}, więc licznik ${field.original} · ${field.factor} = ${field.answer}.`,
           )
         },
-        revealMessage: `${right.n}/${right.d} = ${target}/${lcd}.`,
+        revealMessage:
+          fields.length > 1
+            ? `${left.n}/${left.d} = ${scaledLeft}/${lcd}, a ${right.n}/${right.d} = ${scaledRight}/${lcd}.`
+            : needsLeftScale
+              ? `${left.n}/${left.d} = ${scaledLeft}/${lcd}.`
+              : `${right.n}/${right.d} = ${scaledRight}/${lcd}.`,
       }),
     )
   }
@@ -284,6 +350,10 @@ function buildAddSubSteps(task) {
       answer: resN,
       visual: (input) => (
         <div className="step-formula">
+          <Fraction n={left.n} d={left.d} />
+          <span className="op-sign">{sign}</span>
+          <Fraction n={right.n} d={right.d} />
+          <span className="equals">=</span>
           <Fraction n={scaledLeft} d={lcd} />
           <span className="op-sign">{sign}</span>
           <Fraction n={scaledRight} d={lcd} />
@@ -297,6 +367,10 @@ function buildAddSubSteps(task) {
       ),
       solvedVisual: (
         <span className="solved-line">
+          <Fraction n={left.n} d={left.d} size="sm" />
+          <span className="solved-sign">{sign}</span>
+          <Fraction n={right.n} d={right.d} size="sm" />
+          <span className="solved-sign">=</span>
           <Fraction n={scaledLeft} d={lcd} size="sm" />
           <span className="solved-sign">{sign}</span>
           <Fraction n={scaledRight} d={lcd} size="sm" />
@@ -358,7 +432,17 @@ function buildAddSubSteps(task) {
 /* Mnożenie                                                            */
 /* ------------------------------------------------------------------ */
 
-function buildCrossStep({ id, left, right, pairA, pairB, highlightLeft, highlightRight, expected }) {
+function buildCrossStep({
+  id,
+  left,
+  right,
+  prefix,
+  pairA,
+  pairB,
+  highlightLeft,
+  highlightRight,
+  expected,
+}) {
   return numberStep({
     id,
     title: 'Skracanie na krzyż',
@@ -372,6 +456,7 @@ function buildCrossStep({ id, left, right, pairA, pairB, highlightLeft, highligh
     visual: (input) => (
       <div className="step-formula step-formula--stack">
         <div className="formula-row">
+          {prefix}
           <Fraction
             n={left.n}
             d={left.d}
@@ -400,6 +485,174 @@ function buildCrossStep({ id, left, right, pairA, pairB, highlightLeft, highligh
     ),
     check: checkDivisor(pairA, pairB, expected),
     revealMessage: `Liczby ${pairA} i ${pairB} skracamy przez ${expected}.`,
+  })
+}
+
+function buildReductionStep({
+  op,
+  left,
+  right,
+  convertedRight,
+  g1,
+  g2,
+  workLeft,
+  workRight,
+}) {
+  const fields = []
+
+  if (g1 > 1) {
+    fields.push({
+      id: 'left-n',
+      answer: workLeft.n,
+      original: left.n,
+      divisor: g1,
+      label: 'Licznik pierwszego ułamka',
+      part: 'num',
+    })
+  }
+
+  if (g2 > 1) {
+    fields.push({
+      id: 'left-d',
+      answer: workLeft.d,
+      original: left.d,
+      divisor: g2,
+      label: 'Mianownik pierwszego ułamka',
+      part: 'den',
+    })
+  }
+
+  if (g2 > 1) {
+    fields.push({
+      id: 'right-n',
+      answer: workRight.n,
+      original: convertedRight.n,
+      divisor: g2,
+      label: 'Licznik drugiego ułamka',
+      part: 'num',
+    })
+  }
+
+  if (g1 > 1) {
+    fields.push({
+      id: 'right-d',
+      answer: workRight.d,
+      original: convertedRight.d,
+      divisor: g1,
+      label: 'Mianownik drugiego ułamka',
+      part: 'den',
+    })
+  }
+
+  if (fields.length === 0) return null
+
+  const isDiv = op === 'div'
+  const hintParts = []
+
+  if (g1 > 1) {
+    hintParts.push(
+      `${left.n} i ${convertedRight.d} skracamy przez ${g1}: ${left.n} ÷ ${g1} = ${workLeft.n}, ${convertedRight.d} ÷ ${g1} = ${workRight.d}.`,
+    )
+  }
+
+  if (g2 > 1) {
+    hintParts.push(
+      `${convertedRight.n} i ${left.d} skracamy przez ${g2}: ${convertedRight.n} ÷ ${g2} = ${workRight.n}, ${left.d} ÷ ${g2} = ${workLeft.d}.`,
+    )
+  }
+
+  const reducedLeft = (inputs) =>
+    fractionSlot({
+      n: workLeft.n,
+      d: workLeft.d,
+      numeratorInput: inputs['left-n'],
+      denominatorInput: inputs['left-d'],
+    })
+
+  const reducedRight = (inputs) =>
+    fractionSlot({
+      n: workRight.n,
+      d: workRight.d,
+      numeratorInput: inputs['right-n'],
+      denominatorInput: inputs['right-d'],
+    })
+
+  return partsStep({
+    id: 'reduce',
+    title: 'Skróć na krzyż',
+    prompt: 'Uzupełnij liczby po skróceniu na krzyż.',
+    hint: hintParts.join(' '),
+    fields,
+    emptyMessage: 'Uzupełnij wszystkie zaznaczone liczby.',
+    visual: (inputs) => (
+      <div className="step-formula step-formula--stack">
+        <div className="formula-row">
+          <Fraction n={left.n} d={left.d} />
+          <span className="op-sign">{isDiv ? '÷' : '×'}</span>
+          <Fraction n={right.n} d={right.d} />
+          <span className="equals">=</span>
+          {isDiv ? (
+            <>
+              <Fraction n={left.n} d={left.d} />
+              <span className="op-sign">×</span>
+              <Fraction n={convertedRight.n} d={convertedRight.d} />
+              <span className="equals">=</span>
+            </>
+          ) : null}
+          {reducedLeft(inputs)}
+          <span className="op-sign">×</span>
+          {reducedRight(inputs)}
+        </div>
+      </div>
+    ),
+    solvedVisual: (
+      <span className="solved-line">
+        <Fraction n={left.n} d={left.d} size="sm" />
+        <span className="solved-sign">{isDiv ? '÷' : '×'}</span>
+        <Fraction n={right.n} d={right.d} size="sm" />
+        <span className="solved-sign">=</span>
+        {isDiv ? (
+          <>
+            <Fraction n={left.n} d={left.d} size="sm" />
+            <span className="solved-sign">×</span>
+            <Fraction n={convertedRight.n} d={convertedRight.d} size="sm" />
+            <span className="solved-sign">=</span>
+          </>
+        ) : null}
+        <Fraction n={workLeft.n} d={workLeft.d} size="sm" />
+        <span className="solved-sign">×</span>
+        <Fraction n={workRight.n} d={workRight.d} size="sm" />
+      </span>
+    ),
+    check: (values) => {
+      const incorrect = fields.filter(
+        (field) => values[field.id] !== field.answer,
+      )
+
+      if (incorrect.length === 0) {
+        return ok('Dobrze! Skracanie na krzyż jest gotowe.')
+      }
+
+      const unchanged = incorrect.some(
+        (field) => values[field.id] === field.original,
+      )
+
+      if (unchanged) {
+        return wrong(
+          'Pamiętaj, że skracanie zmienia obie liczby w zaznaczonej parze — podziel je przez wspólny dzielnik.',
+          'warn',
+        )
+      }
+
+      const field = incorrect[0]
+
+      return wrong(
+        `Sprawdź ${field.label.toLowerCase()}: ${field.original} ÷ ${field.divisor} = ${field.answer}.`,
+      )
+    },
+    revealMessage: isDiv
+      ? `${left.n}/${left.d} ÷ ${right.n}/${right.d} = ${left.n}/${left.d} × ${convertedRight.n}/${convertedRight.d} = ${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d}.`
+      : `${left.n}/${left.d} × ${right.n}/${right.d} = ${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d}.`,
   })
 }
 
@@ -437,6 +690,19 @@ function buildMulSteps(task) {
     )
   }
 
+  const reduction = buildReductionStep({
+    op: 'mul',
+    left,
+    right,
+    convertedRight: right,
+    g1,
+    g2,
+    workLeft,
+    workRight,
+  })
+
+  if (reduction) steps.push(reduction)
+
   const product = {
     n: workLeft.n * workRight.n,
     d: workLeft.d * workRight.d,
@@ -451,6 +717,10 @@ function buildMulSteps(task) {
       answer: product,
       visual: (input) => (
         <div className="step-formula">
+          <Fraction n={left.n} d={left.d} />
+          <span className="op-sign">×</span>
+          <Fraction n={right.n} d={right.d} />
+          <span className="equals">=</span>
           <Fraction n={workLeft.n} d={workLeft.d} />
           <span className="op-sign">×</span>
           <Fraction n={workRight.n} d={workRight.d} />
@@ -458,15 +728,21 @@ function buildMulSteps(task) {
           {input}
         </div>
       ),
-      solvedVisual: solvedEquation(
-        workLeft,
-        '×',
-        workRight,
-        '=',
-        answer,
+      solvedVisual: (
+        <span className="solved-line">
+          <Fraction n={left.n} d={left.d} size="sm" />
+          <span className="solved-sign">×</span>
+          <Fraction n={right.n} d={right.d} size="sm" />
+          <span className="solved-sign">=</span>
+          <Fraction n={workLeft.n} d={workLeft.d} size="sm" />
+          <span className="solved-sign">×</span>
+          <Fraction n={workRight.n} d={workRight.d} size="sm" />
+          <span className="solved-sign">=</span>
+          <Fraction n={answer.n} d={answer.d} size="sm" />
+        </span>
       ),
       check: checkSimpleFraction(product),
-      revealMessage: `${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d} = ${product.n}/${product.d}.`,
+      revealMessage: `${left.n}/${left.d} × ${right.n}/${right.d} = ${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d} = ${product.n}/${product.d}.`,
     }),
   )
 
@@ -533,6 +809,14 @@ function buildDivSteps(task) {
   )
 
   const converted = { n: reciprocal.n, d: reciprocal.d }
+  const divisionPrefix = (
+    <>
+      <Fraction n={left.n} d={left.d} />
+      <span className="op-sign">÷</span>
+      <Fraction n={right.n} d={right.d} />
+      <span className="equals">=</span>
+    </>
+  )
 
   if (g1 > 1) {
     steps.push(
@@ -540,6 +824,7 @@ function buildDivSteps(task) {
         id: 'cross-top',
         left,
         right: converted,
+        prefix: divisionPrefix,
         pairA: left.n,
         pairB: reciprocal.d,
         highlightLeft: { numerator: true, denominator: false },
@@ -555,6 +840,7 @@ function buildDivSteps(task) {
         id: 'cross-bottom',
         left,
         right: converted,
+        prefix: divisionPrefix,
         pairA: reciprocal.n,
         pairB: left.d,
         highlightLeft: { numerator: false, denominator: true },
@@ -563,6 +849,19 @@ function buildDivSteps(task) {
       }),
     )
   }
+
+  const reduction = buildReductionStep({
+    op: 'div',
+    left,
+    right,
+    convertedRight: reciprocal,
+    g1,
+    g2,
+    workLeft,
+    workRight,
+  })
+
+  if (reduction) steps.push(reduction)
 
   const product = {
     n: workLeft.n * workRight.n,
@@ -578,6 +877,14 @@ function buildDivSteps(task) {
       answer: product,
       visual: (input) => (
         <div className="step-formula">
+          <Fraction n={left.n} d={left.d} />
+          <span className="op-sign">÷</span>
+          <Fraction n={right.n} d={right.d} />
+          <span className="equals">=</span>
+          <Fraction n={left.n} d={left.d} />
+          <span className="op-sign">×</span>
+          <Fraction n={reciprocal.n} d={reciprocal.d} />
+          <span className="equals">=</span>
           <Fraction n={workLeft.n} d={workLeft.d} />
           <span className="op-sign">×</span>
           <Fraction n={workRight.n} d={workRight.d} />
@@ -585,9 +892,25 @@ function buildDivSteps(task) {
           {input}
         </div>
       ),
-      solvedVisual: solvedEquation(workLeft, '×', workRight, '=', task.answer),
+      solvedVisual: (
+        <span className="solved-line">
+          <Fraction n={left.n} d={left.d} size="sm" />
+          <span className="solved-sign">÷</span>
+          <Fraction n={right.n} d={right.d} size="sm" />
+          <span className="solved-sign">=</span>
+          <Fraction n={left.n} d={left.d} size="sm" />
+          <span className="solved-sign">×</span>
+          <Fraction n={reciprocal.n} d={reciprocal.d} size="sm" />
+          <span className="solved-sign">=</span>
+          <Fraction n={workLeft.n} d={workLeft.d} size="sm" />
+          <span className="solved-sign">×</span>
+          <Fraction n={workRight.n} d={workRight.d} size="sm" />
+          <span className="solved-sign">=</span>
+          <Fraction n={task.answer.n} d={task.answer.d} size="sm" />
+        </span>
+      ),
       check: checkSimpleFraction(product),
-      revealMessage: `${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d} = ${product.n}/${product.d}.`,
+      revealMessage: `${left.n}/${left.d} ÷ ${right.n}/${right.d} = ${left.n}/${left.d} × ${reciprocal.n}/${reciprocal.d} = ${workLeft.n}/${workLeft.d} × ${workRight.n}/${workRight.d} = ${product.n}/${product.d}.`,
     }),
   )
 
