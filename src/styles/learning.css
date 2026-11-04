@@ -1157,7 +1157,7 @@
 
 .topic-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 18px;
 }
 
@@ -1204,6 +1204,11 @@
 .topic-card--amber {
   --topic-color: var(--amber);
   --topic-soft: var(--amber-soft);
+}
+
+.topic-card--rose {
+  --topic-color: var(--rose);
+  --topic-soft: var(--rose-soft);
 }
 
 .topic-card:hover {

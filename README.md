@@ -15,6 +15,9 @@ Dostępne tematy:
 - **Figury i kąty** — pola i obwody kwadratu, prostokąta, trójkątów, rombu,
   równoległoboku, trapezów oraz koła i okręgu. Osobna sekcja wyjaśnia rodzaje
   kątów: ostry, prosty, rozwarty, półpełny, wklęsły i pełny.
+- **Proste i kąty** — prosta, półprosta i odcinek, proste prostopadłe
+  i równoległe, kąty α i β, przecięcia prostych oraz sumy kątów w trójkątach
+  i czworokątach.
 
 Każdy krok jest sprawdzany osobno. Po dwóch błędnych próbach pojawia się
 podpowiedź, a w razie potrzeby można odsłonić pełne rozwiązanie. Postęp zadania
@@ -105,6 +108,14 @@ src/
       GeometryHome.jsx          # ekran startowy, wzory i ściągawka z kątów
       GeometryExercise.jsx      # ekran zadania i podsumowanie
       geometry.css              # style rysunków, kart i zadań geometrycznych
+    lines/
+      lines.js                  # tryby, definicje, zestawy kątów i przykłady
+      generator.js              # losowanie zadań o prostych, kątach i figurach
+      steps.jsx                 # kroki, walidacja, podpowiedzi i wizualizacje
+      LineFigure.jsx            # rysunki prostych, odcinków, przecięć i kątów
+      LinesHome.jsx             # ekran startowy i ściągawka z pojęć
+      LinesExercise.jsx         # ekran zadania i podsumowanie
+      lines.css                 # style rysunków, kart i zadań o prostych
 ```
 
 ## Jak to działa
@@ -184,6 +195,33 @@ Tryby w temacie „Figury i kąty”:
 - **Pola figur** — tylko obliczanie pola,
 - **Obwody figur** — tylko obliczanie obwodu,
 - **Kąty** — rozpoznawanie rodzaju kąta i jego miary.
+
+### Proste i kąty
+
+Temat „Proste i kąty” skupia się na pojęciach z geometrii, które nie są
+obliczaniem pola ani obwodu:
+
+- `lines.js` przechowuje definicje prostych, odcinków, prostopadłych,
+  równoległych, kątów α i β oraz zestawy miar kątów w figurach,
+- `LineFigure.jsx` rysuje proste, odcinki, przecięcia i kąty w SVG,
+- `generator.js` losuje zadania z czterech trybów: podstawy, kąty α i β,
+  przecięcia prostych oraz kąty w figurach.
+
+Zadania mają od jednego do pięciu kroków. Uczeń rozpoznaje pojęcie, wybiera
+związek między kątami, a następnie oblicza miary. Przy przecięciu prostych
+korzysta z tego, że kąty przyległe dają 180°, a wierzchołkowe są równe. Przy
+trójkątach i czworokątach odpowiednio sumuje znane kąty i odejmuje je od 180°
+lub 360°.
+
+Tryby w temacie „Proste i kąty”:
+
+- **Wszystko mieszane** — losowo wszystkie rodzaje zadań,
+- **Proste i odcinki** — rozpoznawanie prostych, półprostych, odcinków,
+  prostopadłych i równoległych,
+- **Kąty α i β** — znaczenie oznaczeń, kąty przyległe, wierzchołkowe i kąty
+  wewnętrzne figur,
+- **Przecięcia prostych** — obliczanie pozostałych kątów, gdy znany jest jeden,
+- **Kąty w figurach** — brakujący kąt w trójkącie lub czworokącie.
 
 ## Rozbudowa
 

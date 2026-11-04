@@ -14,7 +14,7 @@ const HOW_IT_WORKS = [
   {
     title: 'Wybierz temat',
     description:
-      'Ułamki, kolejność działań albo figury. W środku znajdziesz tryby dopasowane do tego, co chcesz ćwiczyć.',
+      'Ułamki, kolejność działań, figury albo proste i kąty. W środku znajdziesz tryby dopasowane do tego, co chcesz ćwiczyć.',
   },
   {
     title: 'Licz krok po kroku',

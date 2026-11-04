@@ -3,10 +3,13 @@ import './App.css'
 import './styles/learning.css'
 import './features/order/order.css'
 import './features/geometry/geometry.css'
+import './features/lines/lines.css'
 import { FractionsExercise } from './features/fractions/FractionsExercise'
 import { FractionsHome } from './features/fractions/FractionsHome'
 import { GeometryExercise } from './features/geometry/GeometryExercise'
 import { GeometryHome } from './features/geometry/GeometryHome'
+import { LinesExercise } from './features/lines/LinesExercise'
+import { LinesHome } from './features/lines/LinesHome'
 import { OrderExercise } from './features/order/OrderExercise'
 import { OrderHome } from './features/order/OrderHome'
 import { TopicsHome } from './features/topics/TopicsHome'
@@ -62,6 +65,13 @@ export default function App() {
           onExit={() => goToTopic('geometry')}
           onSolved={() => setSolvedCount((current) => current + 1)}
         />
+      ) : screen.topic === 'lines' ? (
+        <LinesExercise
+          key={screen.key}
+          mode={screen.mode}
+          onExit={() => goToTopic('lines')}
+          onSolved={() => setSolvedCount((current) => current + 1)}
+        />
       ) : (
         <FractionsExercise
           key={screen.key}
@@ -82,6 +92,14 @@ export default function App() {
     content = (
       <GeometryHome
         onStart={(mode) => startExercise('geometry', mode)}
+        onBack={goTopics}
+        solvedCount={solvedCount}
+      />
+    )
+  } else if (screen.name === 'topic' && screen.topic === 'lines') {
+    content = (
+      <LinesHome
+        onStart={(mode) => startExercise('lines', mode)}
         onBack={goTopics}
         solvedCount={solvedCount}
       />
@@ -141,7 +159,7 @@ export default function App() {
       <footer className="app__footer">
         <span>Matma krok po kroku</span>
         <span aria-hidden="true">·</span>
-        <span>ułamki, kolejność działań i figury</span>
+        <span>ułamki, kolejność działań, figury i kąty</span>
       </footer>
     </div>
   )

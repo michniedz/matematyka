@@ -29,4 +29,14 @@ export const TOPICS = [
       'Pola i obwody kwadratu, prostokąta, trójkątów, rombu, trapezu, równoległoboku oraz koła i okręgu. Rodzaje kątów z wyjaśnieniami.',
     tags: ['pole i obwód', 'wzory', 'rodzaje kątów'],
   },
+  {
+    id: 'lines',
+    title: 'Proste i kąty',
+    eyebrow: 'proste, odcinki, kąty',
+    icon: '∡',
+    color: 'rose',
+    description:
+      'Proste, półproste i odcinki. Prostopadłe i równoległe, kąty α i β, przecięcia prostych oraz kąty w trójkątach i czworokątach.',
+    tags: ['proste i odcinki', 'kąty α i β', 'trójkąty i czworokąty'],
+  },
 ]
