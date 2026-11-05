@@ -4,7 +4,7 @@ import {
   divideValues,
   multiplyValues,
   subtractValues,
-  valueToText,
+  valueToDisplayText,
 } from './values.js'
 
 export const OP_META = {
@@ -146,7 +146,7 @@ export function reduceNode(node, targetId) {
 }
 
 export function nodeToText(node) {
-  if (node.type === 'num') return valueToText(node.value)
+  if (node.type === 'num') return valueToDisplayText(node.value)
 
   const left = nodeToText(node.left)
   const right = nodeToText(node.right)

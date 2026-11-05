@@ -1,7 +1,7 @@
 import { divisors, gcd, lcm } from '../../lib/math.js'
 import { Fraction } from '../../components/Fraction.jsx'
 import { MixedNumber } from '../../components/MixedNumber.jsx'
-import { Expression, NumberToken } from './Expression.jsx'
+import { Expression, FractionTerm, NumberToken } from './Expression.jsx'
 import {
   OP_META,
   collectCandidates,
@@ -150,6 +150,46 @@ function buildFractionHint(node) {
   return `Dzielenie przez ułamek to mnożenie przez jego odwrotność. Odwrotność ${b.n}/${b.d} to ${b.d}/${b.n}. Potem pomnóż i skróć.`
 }
 
+function buildRawHint(node) {
+  if (node.op === '*') {
+    return 'Pomnóż licznik przez licznik, a mianownik przez mianownik. Zapisz wynik bez skracania — skrócimy go w następnym kroku.'
+  }
+
+  const a = evaluateNode(node.left)
+  const b = evaluateNode(node.right)
+  const common = lcm(a.d, b.d)
+
+  return `Sprowadź ułamki do wspólnego mianownika ${common}, a potem ${
+    node.op === '+' ? 'dodaj' : 'odejmij'
+  } liczniki. Zapisz wynik bez skracania — skrócimy go w następnym kroku.`
+}
+
+/**
+ * Wynik działania przed skróceniem. Dla mnożenia to iloczyn liczników
+ * i mianowników, a dla dodawania i odejmowania licznik na wspólnym
+ * mianowniku. Dzielenie ma własne kroki skracania na krzyż, więc tam
+ * od razu korzystamy z gotowego wyniku.
+ */
+function rawCalcValue(target) {
+  const node = target.node
+  const left = evaluateNode(node.left, 'fractions')
+  const right = evaluateNode(node.right, 'fractions')
+
+  if (node.op === '*') {
+    return { n: left.n * right.n, d: left.d * right.d, kind: 'frac' }
+  }
+
+  const common = lcm(left.d, right.d)
+  const leftN = left.n * (common / left.d)
+  const rightN = right.n * (common / right.d)
+
+  return {
+    n: node.op === '+' ? leftN + rightN : leftN - rightN,
+    d: common,
+    kind: 'frac',
+  }
+}
+
 function buildDecimalHint(node) {
   const a = evaluateNode(node.left)
   const b = evaluateNode(node.right)
@@ -219,7 +259,7 @@ function buildReciprocalStep({ id, target, current, division }) {
         <div className="order-calc__row">
           <Expression node={target.node} size="md" />
           <span className="equals">=</span>
-          <NumberToken value={left} size="md" />
+          <FractionTerm value={left} size="md" />
           <span className="op-sign">×</span>
           {input}
         </div>
@@ -229,9 +269,9 @@ function buildReciprocalStep({ id, target, current, division }) {
       <span className="solved-line">
         <Expression node={target.node} size="sm" />
         <span className="solved-sign">=</span>
-        <NumberToken value={left} size="sm" />
+        <FractionTerm value={left} size="sm" />
         <span className="solved-sign">×</span>
-        <NumberToken value={reciprocal} size="sm" />
+        <Fraction n={reciprocal.n} d={reciprocal.d} size="sm" />
       </span>
     ),
     check: (value) => {
@@ -396,22 +436,67 @@ function buildCalcStep({
   style,
   phase,
   division,
+  raw,
 }) {
   const meta = OP_META[target.node.op]
   const text = nodeToText(target.node)
-  const wholeResult = style === 'fractions' && value.d === 1
+  const mixedResult =
+    style === 'fractions' && !raw ? toMixed(value) : null
+  const wholeResult = style === 'fractions' && !raw && value.d === 1
   const kind =
     style === 'fractions'
-      ? wholeResult
-        ? 'number'
-        : 'fraction'
+      ? raw
+        ? 'fraction'
+        : mixedResult
+          ? 'mixed'
+          : wholeResult
+            ? 'number'
+            : 'fraction'
       : 'decimal'
-  const answer = wholeResult ? value.n : value
+  const answer = raw ?? mixedResult ?? (wholeResult ? value.n : value)
   const answerText =
     style === 'decimals'
       ? formatDecimal(value) ?? valueToText(value)
-      : valueToText(value)
+      : raw
+        ? `${raw.n}/${raw.d}`
+        : mixedResult
+          ? mixedToText(mixedResult)
+          : valueToText(value)
   const fractionDivision = style === 'fractions' && Boolean(division)
+  const basePrompt = fractionDivision
+    ? 'Uzupełnij wynik mnożenia.'
+    : `Ile wynosi ${text}?`
+  const baseHint = fractionDivision
+    ? division.reduced
+      ? 'Po skróceniu pomnóż licznik przez licznik, a mianownik przez mianownik.'
+      : 'Pomnóż licznik przez licznik, a mianownik przez mianownik. Na końcu sprawdź, czy wynik jest w najprostszej postaci.'
+    : style === 'fractions'
+      ? buildFractionHint(target.node)
+      : buildDecimalHint(target.node)
+  const mistakeMessage = () => {
+    if (target.node.op === '/') {
+      return `Jeszcze nie. Sprawdź dzielenie ${text}. Przy dzieleniu przez ułamek pomnóż przez jego odwrotność.`
+    }
+
+    if (target.node.op === '-' || target.node.op === '+') {
+      return `Jeszcze nie. Policz uważnie ${text}. Pamiętaj o wspólnym mianowniku przy ułamkach i o wyrównaniu przecinków przy liczbach dziesiętnych.`
+    }
+
+    return `Jeszcze nie. Policz uważnie ${text} — pomnóż liczniki i mianowniki, a wynik skróć.`
+  }
+  const resultVisual = (size) =>
+    raw ? (
+      <Fraction n={raw.n} d={raw.d} size={size} />
+    ) : mixedResult ? (
+      <MixedNumber
+        whole={mixedResult.whole}
+        n={mixedResult.n}
+        d={mixedResult.d}
+        size={size}
+      />
+    ) : (
+      <NumberToken value={value} size={size} />
+    )
 
   return {
     id,
@@ -422,16 +507,16 @@ function buildCalcStep({
         : fractionDivision
           ? 'Dzielenie ułamków'
           : `${meta.name[0].toUpperCase()}${meta.name.slice(1)}`,
-    prompt: fractionDivision
-      ? 'Uzupełnij wynik mnożenia.'
-      : `Ile wynosi ${text}?`,
-    hint: fractionDivision
-      ? division.reduced
-        ? 'Po skróceniu pomnóż licznik przez licznik, a mianownik przez mianownik.'
-        : 'Pomnóż licznik przez licznik, a mianownik przez mianownik. Na końcu sprawdź, czy wynik jest w najprostszej postaci.'
-      : style === 'fractions'
-        ? buildFractionHint(target.node)
-        : buildDecimalHint(target.node),
+    prompt: raw
+      ? `${basePrompt} Wpisz wynik przed skróceniem.`
+      : mixedResult
+        ? `${basePrompt} Wynik zapisz jako liczbę mieszaną.`
+        : basePrompt,
+    hint: raw
+      ? buildRawHint(target.node)
+      : mixedResult
+        ? `${baseHint} Wynik jest większy od 1, więc wyciągnij całości: ${value.n} ÷ ${value.d} = ${mixedResult.whole} reszty ${mixedResult.n}.`
+        : baseHint,
     answer,
     answerText,
     visual: (input) => (
@@ -452,9 +537,13 @@ function buildCalcStep({
             <>
               <Expression node={target.node} size="md" />
               <span className="equals">=</span>
-              <NumberToken value={division.left} size="md" />
+              <FractionTerm value={division.left} size="md" />
               <span className="op-sign">×</span>
-              <NumberToken value={division.reciprocal} size="md" />
+              <Fraction
+                n={division.reciprocal.n}
+                d={division.reciprocal.d}
+                size="md"
+              />
               {division.reduced ? (
                 <>
                   <span className="equals">=</span>
@@ -488,9 +577,13 @@ function buildCalcStep({
       <span className="solved-line">
         <Expression node={target.node} size="sm" />
         <span className="solved-sign">=</span>
-        <NumberToken value={division.left} size="sm" />
+        <FractionTerm value={division.left} size="sm" />
         <span className="solved-sign">×</span>
-        <NumberToken value={division.reciprocal} size="sm" />
+        <Fraction
+          n={division.reciprocal.n}
+          d={division.reciprocal.d}
+          size="sm"
+        />
         {division.reduced ? (
           <>
             <span className="solved-sign">=</span>
@@ -508,16 +601,67 @@ function buildCalcStep({
           </>
         ) : null}
         <span className="solved-sign">=</span>
-        <NumberToken value={value} size="sm" />
+        {resultVisual('sm')}
       </span>
     ) : (
       <span className="solved-line">
         <Expression node={target.node} size="sm" />
         <span className="solved-sign">=</span>
-        <NumberToken value={value} size="sm" />
+        {resultVisual('sm')}
       </span>
     ),
     check: (input) => {
+      if (raw) {
+        const parsed = typeof input === 'number' ? { n: input, d: 1 } : input
+
+        if (parsed.n === raw.n && parsed.d === raw.d) {
+          return ok(
+            `Dobrze! ${text} = ${raw.n}/${raw.d}. Teraz skrócimy wynik.`,
+          )
+        }
+
+        if (parsed.n * raw.d === raw.n * parsed.d) {
+          return wrong(
+            `To ta sama wartość, ale zapisz dokładny wynik działania przed skróceniem: ${raw.n}/${raw.d}.`,
+            'warn',
+          )
+        }
+
+        return wrong(mistakeMessage())
+      }
+
+      if (kind === 'mixed') {
+        const { whole, n, d } = input
+        const totalN = whole * d + n
+
+        if (n === 0) {
+          return wrong(
+            'Część ułamkowa nie może być zerowa. Całości wpisz w pierwsze pole, a w liczniku zostaw resztę.',
+            'warn',
+          )
+        }
+
+        if (n >= d) {
+          return wrong(
+            'Część ułamkowa musi być mniejsza od mianownika. Wyciągnij całości do pierwszego pola.',
+            'warn',
+          )
+        }
+
+        if (totalN * value.d !== value.n * d) {
+          return wrong(mistakeMessage())
+        }
+
+        if (gcd(n, d) > 1) {
+          return wrong(
+            'To poprawna wartość, ale część ułamkowa nie jest w najprostszej postaci — skróć licznik i mianownik przez ich największy wspólny dzielnik.',
+            'warn',
+          )
+        }
+
+        return ok(`Dobrze! ${text} = ${answerText}.`)
+      }
+
       const parsed = typeof input === 'number' ? { n: input, d: 1 } : input
 
       if (parsed.n <= 0) {
@@ -539,44 +683,66 @@ function buildCalcStep({
         return ok(`Dobrze! ${text} = ${answerText}.`)
       }
 
-      if (target.node.op === '/') {
-        return wrong(
-          `Jeszcze nie. Sprawdź dzielenie ${text}. Przy dzieleniu przez ułamek pomnóż przez jego odwrotność.`,
-        )
-      }
-
-      if (target.node.op === '-' || target.node.op === '+') {
-        return wrong(
-          `Jeszcze nie. Policz uważnie ${text}. Pamiętaj o wspólnym mianowniku przy ułamkach i o wyrównaniu przecinków przy liczbach dziesiętnych.`,
-        )
-      }
-
-      return wrong(
-        `Jeszcze nie. Policz uważnie ${text} — pomnóż liczniki i mianowniki, a wynik skróć.`,
-      )
+      return wrong(mistakeMessage())
     },
     revealMessage: `${text} = ${answerText}.`,
   }
 }
 
-function buildMixedStep({ id, value }) {
+function buildSimplifyStep({ id, raw, value }) {
+  const divisor = gcd(raw.n, raw.d)
   const mixed = toMixed(value)
-  if (!mixed) return null
+  const kind = value.d === 1 ? 'number' : mixed ? 'mixed' : 'fraction'
+  const rawText = `${raw.n}/${raw.d}`
+  const answerText =
+    kind === 'mixed'
+      ? mixedToText(mixed)
+      : kind === 'number'
+        ? String(value.n)
+        : `${value.n}/${value.d}`
+  const hint =
+    kind === 'mixed'
+      ? `Podziel licznik i mianownik przez ${divisor}: ${raw.n} ÷ ${divisor} = ${value.n}, ${raw.d} ÷ ${divisor} = ${value.d}. Potem wyciągnij całości: ${value.n} ÷ ${value.d} = ${mixed.whole} reszty ${mixed.n}.`
+      : `Podziel licznik i mianownik przez ich największy wspólny dzielnik. NWD(${raw.n}, ${raw.d}) = ${divisor}. ${raw.n} ÷ ${divisor} = ${value.n}, ${raw.d} ÷ ${divisor} = ${value.d}.`
+  const prompt =
+    kind === 'mixed'
+      ? 'Skróć ułamek i zapisz wynik jako liczbę mieszaną.'
+      : kind === 'number'
+        ? 'Skróć wynik i zapisz go jako liczbę całkowitą.'
+        : 'Skróć ułamek do najprostszej postaci.'
 
-  const mixedText = mixedToText(mixed)
+  const resultVisual = (size) => {
+    if (kind === 'mixed') {
+      return (
+        <MixedNumber
+          whole={mixed.whole}
+          n={mixed.n}
+          d={mixed.d}
+          size={size}
+        />
+      )
+    }
+
+    if (kind === 'number') {
+      return <NumberToken value={value} size={size} />
+    }
+
+    return <Fraction n={value.n} d={value.d} size={size} />
+  }
 
   return {
     id,
-    kind: 'mixed',
-    title: 'Wyciągnij całości',
-    prompt: 'Zapisz wynik jako liczbę mieszaną.',
-    hint: `Podziel licznik przez mianownik: ${value.n} ÷ ${value.d} = ${mixed.whole} reszty ${mixed.n}. Całości to ${mixed.whole}, a reszta ${mixed.n} zostaje w liczniku. Mianownik się nie zmienia.`,
-    answer: mixed,
+    kind,
+    title: kind === 'mixed' ? 'Skróć i wyciągnij całości' : 'Skróć wynik',
+    prompt,
+    hint,
+    answer: kind === 'mixed' ? mixed : kind === 'number' ? value.n : value,
+    answerText,
     visual: (input) => (
       <div className="order-mixed">
-        <span className="order-phase__caption">Wynik jako liczba mieszana</span>
+        <span className="order-phase__caption">Wynik przed skróceniem</span>
         <div className="order-mixed__row">
-          <Fraction n={value.n} d={value.d} size="md" />
+          <Fraction n={raw.n} d={raw.d} size="md" />
           <span className="equals">=</span>
           {input}
         </div>
@@ -584,40 +750,74 @@ function buildMixedStep({ id, value }) {
     ),
     solvedVisual: (
       <span className="solved-line">
-        <Fraction n={value.n} d={value.d} size="sm" />
+        <Fraction n={raw.n} d={raw.d} size="sm" />
         <span className="solved-sign">=</span>
-        <MixedNumber whole={mixed.whole} n={mixed.n} d={mixed.d} size="sm" />
+        {resultVisual('sm')}
       </span>
     ),
     check: (input) => {
-      if (
-        input.whole === mixed.whole &&
-        input.n === mixed.n &&
-        input.d === mixed.d
-      ) {
-        return ok(`Dobrze! ${value.n}/${value.d} = ${mixedText}.`)
+      if (kind === 'mixed') {
+        const { whole, n, d } = input
+        const totalN = whole * d + n
+
+        if (n === 0) {
+          return wrong(
+            'Wpisz część ułamkową — resztę z dzielenia umieść w liczniku.',
+            'warn',
+          )
+        }
+
+        if (n >= d) {
+          return wrong(
+            'Część ułamkowa musi być mniejsza od mianownika. Wyciągnij całości do pierwszego pola.',
+            'warn',
+          )
+        }
+
+        if (totalN * value.d !== value.n * d) {
+          return wrong(
+            'Jeszcze nie. Najpierw skróć ułamek, a potem wyciągnij całości.',
+          )
+        }
+
+        if (gcd(n, d) > 1) {
+          return wrong(
+            'To poprawna wartość, ale część ułamkowa nie jest w najprostszej postaci — skróć ją.',
+            'warn',
+          )
+        }
+
+        return ok(`Dobrze! ${rawText} = ${answerText}.`)
       }
 
-      if (input.d !== mixed.d) {
+      if (kind === 'number') {
+        if (input === value.n) {
+          return ok(`Dobrze! ${rawText} = ${value.n}.`)
+        }
+
         return wrong(
-          'Mianownik się nie zmienia. Przepisz mianownik z ułamka.',
-          'warn',
+          'Jeszcze nie. Podziel licznik i mianownik przez ich największy wspólny dzielnik.',
         )
       }
 
-      if (input.whole !== mixed.whole) {
+      if (input.n * value.d === value.n * input.d) {
+        if (input.n === value.n && input.d === value.d) {
+          return ok(`Dobrze! ${rawText} = ${answerText}.`)
+        }
+
+        const remaining = gcd(input.n, input.d)
+
         return wrong(
-          `Podziel licznik przez mianownik: ${value.n} ÷ ${value.d}. Ile pełnych całości się mieści?`,
+          `To ta sama wartość, ale można ją jeszcze skrócić. Podziel licznik i mianownik przez ${remaining}.`,
           'warn',
         )
       }
 
       return wrong(
-        `Całości są dobre. Resztę z dzielenia wpisz w licznik: ${value.n} − ${mixed.whole} · ${value.d} = ${mixed.n}.`,
-        'warn',
+        'Skracanie nie zmienia wartości ułamka. Podziel licznik i mianownik przez tę samą liczbę.',
       )
     },
-    revealMessage: `${value.n}/${value.d} = ${mixedText}.`,
+    revealMessage: `${rawText} = ${answerText}.`,
   }
 }
 
@@ -662,28 +862,36 @@ export function buildSteps(task) {
       division = prepared.division
     }
 
+    const value = evaluateNode(target.node, task.style)
+    const raw =
+      task.style === 'fractions' && !division ? rawCalcValue(target) : null
+    const rawNeedsSimplify = raw && gcd(raw.n, raw.d) > 1 ? raw : null
+
     steps.push(
       buildCalcStep({
         id: `calc-${calcIndex}`,
         target,
         current,
-        value: evaluateNode(target.node, task.style),
+        value,
         style: task.style,
         phase,
         division,
+        raw: rawNeedsSimplify,
       }),
     )
+
+    if (rawNeedsSimplify) {
+      steps.push(
+        buildSimplifyStep({
+          id: `calc-${calcIndex}-simplify`,
+          raw: rawNeedsSimplify,
+          value,
+        }),
+      )
+    }
+
     calcIndex += 1
     current = reduceNode(current, target.node.id)
-  }
-
-  if (current.type === 'num' && task.style === 'fractions') {
-    const mixedStep = buildMixedStep({
-      id: 'mixed-final',
-      value: task.answer,
-    })
-
-    if (mixedStep) steps.push(mixedStep)
   }
 
   return steps

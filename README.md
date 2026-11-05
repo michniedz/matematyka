@@ -75,6 +75,8 @@ src/
     Fraction.jsx                # zapis ułamka
     FractionBar.jsx             # pasek ilustrujący ułamek
     FractionInput.jsx           # pola licznika i mianownika
+    MixedInput.jsx              # pola całości, licznika i mianownika
+    MixedNumber.jsx             # zapis liczby mieszanej
     NumberInput.jsx             # pole liczby całkowitej lub dziesiętnej
     StepCard.jsx                # pojedynczy krok: wpis, wybór, błędy, podpowiedź
     ExerciseLayout.jsx          # wspólny układ zadania, postęp i oś czasu
@@ -155,13 +157,20 @@ sam silnik obsługuje ułamki zwykłe i liczby dziesiętne bez zaokrągleń.
    priorytetu, pojawia się krok wyboru („co wykonujemy teraz?”), a potem krok
    obliczenia wybranego działania. Wyrażenie na ekranie zmniejsza się aż do
    jednej liczby. Gdy wynikiem działania jest liczba całkowita, uczeń wpisuje
-   ją w jednym polu zamiast w liczniku i mianowniku. Przy dzieleniu ułamków
-   krok obliczenia jest rozbity: najpierw odwrotność, potem skracanie na krzyż
-   (największy wspólny dzielnik), a dopiero na końcu wynik mnożenia.
-4. Odpowiedzi ułamkowe muszą być w najprostszej postaci; liczby dziesiętne
-   można wpisać z przecinkiem lub kropką. Jeśli końcowy wynik jest ułamkiem
-   niewłaściwym, pojawia się dodatkowy krok na wyciągnięcie całości — np.
-   `13/4` zamieniamy na `3 i 1/4`.
+   ją w jednym polu zamiast w liczniku i mianowniku. Gdy wynik jest ułamkiem
+   niewłaściwym, uczeń od razu zapisuje go jako liczbę mieszaną — w polu
+   całości oraz w polach licznika i mianownika (np. `13/4` → `3 i 1/4`). Jeśli
+   wynik da się skrócić, krok obliczenia prosi najpierw o zapisanie go dokładnie
+   tak, jak wyszedł z działania (np. `2 × 3/4 = 6/4`), a dopiero następny krok
+   każe go skrócić i — gdy to konieczne — wyciągnąć całości (`6/4 = 1 i 1/2`).
+   Przy dzieleniu ułamków krok obliczenia jest rozbity: najpierw odwrotność,
+   potem skracanie na krzyż (największy wspólny dzielnik), a dopiero na końcu
+   wynik mnożenia. Odwrotność i liczby po skracaniu zostają zapisane jako
+   ułamki niewłaściwe, żeby łatwo było mnożyć.
+4. W kroku skracania odpowiedzi ułamkowe muszą być w najprostszej postaci;
+   liczby dziesiętne można wpisać z przecinkiem lub kropką. Wynik mieszany jest
+   sprawdzany od razu w kroku obliczenia lub skracania, więc nie ma osobnego
+   kroku na wyciąganie całości na końcu zadania.
 
 Tryby w temacie „Kolejność działań”:
 

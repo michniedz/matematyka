@@ -138,3 +138,17 @@ export function valueToText(value) {
 
   return String(value.n)
 }
+
+/**
+ * Zapis do pokazania uczniowi: ułamek niewłaściwy zamieniamy na liczbę
+ * mieszaną (13/4 → 3 i 1/4), a pozostałe liczby zostawiamy bez zmian.
+ * Do obliczeń i skracania nadal używamy valueToText (ułamek niewłaściwy).
+ */
+export function valueToDisplayText(value) {
+  if (value.kind === 'frac') {
+    const mixed = toMixed(value)
+    if (mixed) return mixedToText(mixed)
+  }
+
+  return valueToText(value)
+}

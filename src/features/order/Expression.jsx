@@ -1,9 +1,24 @@
 import { Fraction } from '../../components/Fraction.jsx'
+import { MixedNumber } from '../../components/MixedNumber.jsx'
 import { OP_META, nodeToText } from './expression.js'
-import { formatDecimal } from './values.js'
+import { formatDecimal, toMixed } from './values.js'
 
 export function NumberToken({ value, size = 'md', tone = '' }) {
   if (value.kind === 'frac' && value.d !== 1) {
+    const mixed = toMixed(value)
+
+    if (mixed) {
+      return (
+        <MixedNumber
+          whole={mixed.whole}
+          n={mixed.n}
+          d={mixed.d}
+          size={size}
+          tone={tone || undefined}
+        />
+      )
+    }
+
     return <Fraction n={value.n} d={value.d} size={size} tone={tone || undefined} />
   }
 
@@ -20,6 +35,18 @@ export function NumberToken({ value, size = 'md', tone = '' }) {
     .join(' ')
 
   return <span className={classes}>{text}</span>
+}
+
+/**
+ * Ułamek bez zamiany na liczbę mieszaną. Używamy go w mnożeniu przez
+ * odwrotność, gdzie wygodniej zostać przy ułamkach niewłaściwych.
+ */
+export function FractionTerm({ value, size = 'md', tone = '' }) {
+  if (value.d === 1) {
+    return <NumberToken value={value} size={size} tone={tone} />
+  }
+
+  return <Fraction n={value.n} d={value.d} size={size} tone={tone || undefined} />
 }
 
 function renderNode(node, highlightId, size, tone) {
