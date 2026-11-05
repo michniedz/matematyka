@@ -74,6 +74,22 @@ export function valuesEqual(a, b) {
   return a.n * b.d === b.n * a.d
 }
 
+/** Zamienia ułamek niewłaściwy na liczbę mieszaną, np. 13/4 → 3 i 1/4. */
+export function toMixed(value) {
+  if (value.d === 1 || value.n <= value.d) return null
+
+  const whole = Math.floor(value.n / value.d)
+  const n = value.n % value.d
+
+  if (n === 0) return null
+
+  return { whole, n, d: value.d }
+}
+
+export function mixedToText(parts) {
+  return `${parts.whole} i ${parts.n}/${parts.d}`
+}
+
 export function isPositive(value) {
   return value.n > 0
 }

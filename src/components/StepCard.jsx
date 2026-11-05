@@ -2,11 +2,16 @@ import { useRef, useState } from 'react'
 import { simplify } from '../lib/math.js'
 import { FractionInput } from './FractionInput.jsx'
 import { FractionPartInput } from './FractionPartInput.jsx'
+import { MixedInput } from './MixedInput.jsx'
 import { NumberInput } from './NumberInput.jsx'
 
 function emptyValue(step) {
   if (step.kind === 'parts' || step.kind === 'fields') {
     return Object.fromEntries(step.fields.map((field) => [field.id, '']))
+  }
+
+  if (step.kind === 'mixed') {
+    return { whole: '', n: '', d: '' }
   }
 
   return step.kind === 'fraction' ? { n: '', d: '' } : ''
@@ -66,6 +71,12 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
               : '?'
           }
         />
+      )
+    }
+
+    if (step.kind === 'mixed') {
+      return (
+        <MixedInput value={value} onChange={setValue} disabled={solved} />
       )
     }
 
@@ -274,6 +285,31 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
       return
     }
 
+    if (step.kind === 'mixed') {
+      const whole = parseInteger(value.whole)
+      const numerator = parseInteger(value.n)
+      const denominator = parseInteger(value.d)
+
+      if (whole === null || numerator === null || denominator === null) {
+        setFeedback({
+          tone: 'error',
+          text: 'Uzupełnij całości, licznik i mianownik.',
+        })
+        return
+      }
+
+      if (denominator === 0) {
+        setFeedback({
+          tone: 'error',
+          text: 'Mianownik nie może być zerem. Spróbuj jeszcze raz.',
+        })
+        return
+      }
+
+      handleResult(step.check({ whole, n: numerator, d: denominator }))
+      return
+    }
+
     if (step.kind === 'decimal') {
       const parsed = parseDecimal(value)
 
@@ -331,6 +367,12 @@ export function StepCard({ step, index, total, isLast, onSolved, onNext }) {
           step.denominatorOptional && step.answer.d === 1
             ? ''
             : String(step.answer.d),
+      })
+    } else if (step.kind === 'mixed') {
+      setValue({
+        whole: String(step.answer.whole),
+        n: String(step.answer.n),
+        d: String(step.answer.d),
       })
     } else if (step.kind === 'decimal') {
       setValue(String(step.answerText ?? ''))

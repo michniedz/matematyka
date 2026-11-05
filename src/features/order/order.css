@@ -169,6 +169,73 @@
   border-top: 1px dashed var(--border-strong);
 }
 
+/* Liczba mieszana */
+
+.mixed-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18em;
+  color: var(--text-strong);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.mixed-number--sm {
+  font-size: 0.98rem;
+}
+
+.mixed-number--md {
+  font-size: 1.45rem;
+}
+
+.mixed-number--lg {
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+}
+
+.mixed-number--xl {
+  font-size: clamp(2.7rem, 4.8vw, 3.5rem);
+}
+
+.mixed-number--success {
+  color: var(--green);
+}
+
+.mixed-number__whole {
+  line-height: 1.12;
+}
+
+.mixed-number--input {
+  gap: 0.35em;
+}
+
+.mixed-number--input .mixed-number__whole {
+  width: 2.8em;
+}
+
+/* Zamiana ułamka na liczbę mieszaną */
+
+.order-mixed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.order-mixed__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 16px;
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-strong);
+}
+
 /* Strona startowa działu */
 
 .order-hero__card {

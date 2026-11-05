@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { ExerciseLayout } from '../../components/ExerciseLayout.jsx'
+import { MixedNumber } from '../../components/MixedNumber.jsx'
 import { StepCard } from '../../components/StepCard.jsx'
 import { Expression, NumberToken } from './Expression.jsx'
 import { generateTask } from './generator.js'
 import { buildSteps } from './steps.jsx'
+import { toMixed } from './values.js'
 
 const TIP_TITLE = 'Nawiasy → × i ÷ → + i −'
 const TIPS = {
@@ -55,8 +57,9 @@ function TaskCard({ task }) {
 function SuccessCard({ task, helped, onNext, onExit }) {
   const note =
     task.style === 'fractions'
-      ? 'Pamiętaj, że ułamki zapisujemy w najprostszej postaci.'
+      ? 'Pamiętaj, że ułamki zapisujemy w najprostszej postaci, a wynik niewłaściwy — jako liczbę mieszaną.'
       : 'Wynik zapisujemy z przecinkiem — bez zbędnych zer na końcu.'
+  const mixed = task.style === 'fractions' ? toMixed(task.answer) : null
 
   return (
     <section className={`success-card${helped ? ' success-card--helped' : ''}`}>
@@ -73,7 +76,17 @@ function SuccessCard({ task, helped, onNext, onExit }) {
       <div className="success-card__equation order-success__equation">
         <Expression node={task.ast} size="md" />
         <span className="success-card__sign">=</span>
-        <NumberToken value={task.answer} size="xl" tone="success" />
+        {mixed ? (
+          <MixedNumber
+            whole={mixed.whole}
+            n={mixed.n}
+            d={mixed.d}
+            size="xl"
+            tone="success"
+          />
+        ) : (
+          <NumberToken value={task.answer} size="xl" tone="success" />
+        )}
       </div>
 
       <p className="success-card__note">

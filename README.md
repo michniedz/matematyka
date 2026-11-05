@@ -154,9 +154,12 @@ sam silnik obsługuje ułamki zwykłe i liczby dziesiętne bez zaokrągleń.
 3. `buildSteps(task)` zamienia ten przebieg na kroki. Gdy zmienia się poziom
    priorytetu, pojawia się krok wyboru („co wykonujemy teraz?”), a potem krok
    obliczenia wybranego działania. Wyrażenie na ekranie zmniejsza się aż do
-   jednej liczby.
+   jednej liczby. Gdy wynikiem działania jest liczba całkowita, uczeń wpisuje
+   ją w jednym polu zamiast w liczniku i mianowniku.
 4. Odpowiedzi ułamkowe muszą być w najprostszej postaci; liczby dziesiętne
-   można wpisać z przecinkiem lub kropką.
+   można wpisać z przecinkiem lub kropką. Jeśli końcowy wynik jest ułamkiem
+   niewłaściwym, pojawia się dodatkowy krok na wyciągnięcie całości — np.
+   `13/4` zamieniamy na `3 i 1/4`.
 
 Tryby w temacie „Kolejność działań”:
 
