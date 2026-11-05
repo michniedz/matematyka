@@ -155,7 +155,9 @@ sam silnik obsługuje ułamki zwykłe i liczby dziesiętne bez zaokrągleń.
    priorytetu, pojawia się krok wyboru („co wykonujemy teraz?”), a potem krok
    obliczenia wybranego działania. Wyrażenie na ekranie zmniejsza się aż do
    jednej liczby. Gdy wynikiem działania jest liczba całkowita, uczeń wpisuje
-   ją w jednym polu zamiast w liczniku i mianowniku.
+   ją w jednym polu zamiast w liczniku i mianowniku. Przy dzieleniu ułamków
+   krok obliczenia jest rozbity: najpierw odwrotność, potem skracanie na krzyż
+   (największy wspólny dzielnik), a dopiero na końcu wynik mnożenia.
 4. Odpowiedzi ułamkowe muszą być w najprostszej postaci; liczby dziesiętne
    można wpisać z przecinkiem lub kropką. Jeśli końcowy wynik jest ułamkiem
    niewłaściwym, pojawia się dodatkowy krok na wyciągnięcie całości — np.
